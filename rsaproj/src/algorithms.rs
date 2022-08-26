@@ -25,28 +25,31 @@ fn find_2_primes() -> (BigUint, BigUint) {
 }
 
 // this seems to work
-pub fn get_prime(bit_size: u64) -> BigUint {
+pub fn get_prime(bit_size: u64, trials: i32) -> BigUint {
     let mut rng = rand::thread_rng();
     loop {
         let mut p = rng.gen_biguint(bit_size);
         if ((&p) % 2.to_biguint().unwrap()).is_zero() {
             p = p + 1.to_biguint().unwrap();
         }
-        if f_test(&p) {
+        if f_test(&p, trials) {
             return p;
         }
     }
 }
 
-// this works probably
-pub fn f_test(p: &BigUint) -> bool {
+// TODO: for some reason, this returns false on primes... not sure why...
+// good news is that it is safe and RARELY calls a composite prime.
+pub fn f_test(p: &BigUint, trials: i32) -> bool {
     let mut rng = rand::thread_rng();
-    let a = rng.gen_biguint(10); // don't hardcode max
-    let psubone = p - 1.to_biguint().unwrap();
-    if a.modpow(&psubone, p).is_one() {
-        return true;
+    for _ in 0..trials {
+        let a = rng.gen_biguint(10); // TODO: don't hardcode max
+        let psubone = p - 1.to_biguint().unwrap();
+        if !a.modpow(&psubone, p).is_one() {
+            return false;
+        }
     }
-    return false;
+    return true;
 }
 
 // this can definitely be optimized... but it works for now
